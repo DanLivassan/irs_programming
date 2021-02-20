@@ -1,5 +1,3 @@
-#!/home/dan/PycharmProjects/webcrawler/venv/bin/ python3
-
 from bs4 import BeautifulSoup
 import requests
 import os, sys
@@ -46,7 +44,7 @@ def request_data(url, payload):
     return r.content
 
 
-def extract_data(content):
+def extract_and_return_last_item(content):
     soup = BeautifulSoup(content, 'html.parser')
     last_item = int(soup.find(attrs={"class": "ShowByColumn"}).text.strip().replace(",", "").split(" ")[-2])
     for line in soup.find(attrs={"class": "picklist-dataTable"}).find_all('tr')[1:]:
@@ -133,7 +131,7 @@ if __name__ == "__main__":
         command_error_msg("")
         exit()
 
-    while indexOfFirstRow + resultsPerPage < extract_data(request_data(url, payload)):
+    while indexOfFirstRow + resultsPerPage < extract_and_return_last_item(request_data(url, payload)):
         indexOfFirstRow = indexOfFirstRow + resultsPerPage
         payload = {
             "indexOfFirstRow": indexOfFirstRow,
@@ -143,7 +141,6 @@ if __name__ == "__main__":
             "resultsPerPage": resultsPerPage,
             "isDescending": "false"
         }
-
     df = pd.DataFrame(data)
 
     if arg_list[1] == DOWNLOAD:
@@ -153,4 +150,4 @@ if __name__ == "__main__":
     elif arg_list[1] == GET_JSON:
         json_format(df)
     else:
-        command_error_msg()
+        command_error_msg("")
