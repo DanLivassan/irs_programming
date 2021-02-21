@@ -41,7 +41,7 @@ def command_error_msg(err_str=""):
 
 def request_data(url, payload):
     r = requests.get(url, params=payload)
-    return r.content
+    return r.content, r.status_code
 
 
 def extract_and_return_last_item(content):
@@ -131,7 +131,7 @@ if __name__ == "__main__":
         command_error_msg("")
         exit()
 
-    while indexOfFirstRow + resultsPerPage < extract_and_return_last_item(request_data(url, payload)):
+    while indexOfFirstRow + resultsPerPage < extract_and_return_last_item(request_data(url, payload)[0]):
         indexOfFirstRow = indexOfFirstRow + resultsPerPage
         payload = {
             "indexOfFirstRow": indexOfFirstRow,
