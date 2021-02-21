@@ -6,7 +6,7 @@ format a json response with the command get_json and download the pdfs with the 
 Python version: Python 3.8.5
 ####
 
-To install the dependencies you have to run the script:
+To install the dependencies you have to run the command:
  - pip install requirements.txt
 
 
