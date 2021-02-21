@@ -9,34 +9,55 @@ import re
 
 GET_JSON = 'get_json'
 DOWNLOAD = "download"
-max_year = 2020
-min_year = 2020
-
 
 indexOfFirstRow = 0
 resultsPerPage = 200
-value = ""
 
 path_pattern = "{}/{} - {}.pdf"
 data = []
 url = 'https://apps.irs.gov/app/picklist/list/priorFormPublication.html'
 
 
-payload = {
-    "indexOfFirstRow": indexOfFirstRow,
-    "sortColumn": "sortOrder",
-    "value": value,
-    "criteria": "formNumber",
-    "resultsPerPage": resultsPerPage,
-    "isDescending": "false"
-}
+def get_payload(value, indexOfFirstRow):
+    return {
+        "indexOfFirstRow": indexOfFirstRow,
+        "sortColumn": "sortOrder",
+        "value": value,
+        "criteria": "formNumber",
+        "resultsPerPage": resultsPerPage,
+        "isDescending": "false"
+    }
 
 
-def command_error_msg(err_str=""):
+def parse_args(args_list):
+
+    if args_list[1] == GET_JSON:
+        try:
+            return GET_JSON, args_list[2]
+        except Exception as e:
+            return handle_error(e.__str__())
+    elif args_list[1] == DOWNLOAD:
+        try:
+            rex = re.compile("^[0-9]{4}-[0-9]{4}")
+            if rex.match(args_list[3]):
+                min_year, max_year = args_list[3].split("-")
+                if min_year > max_year:
+                    raise Exception("The minimum year is greater than the maximum year")
+                return DOWNLOAD, args_list[2], min_year, max_year
+            else:
+                raise Exception("The pattern of the year should be yyyy-yyyy")
+        except Exception as e:
+            return handle_error(e.__str__())
+    else:
+        return handle_error("This action not exists")
+
+
+def handle_error(err_str=""):
     print(err_str)
     print('\n\nCommand Error!\n\nCall the commands as bellow: '
           '\n\npython main.py get_json "<form_number>"'
           '\npython main.py download "<form_number>" <min_year>-<max_year>\n\n')
+    return False
 
 
 def request_data(url, payload):
@@ -57,7 +78,7 @@ def extract_and_return_last_item(content):
             }
         )
 
-    return last_item
+    return last_item, data
 
 
 def json_format(df):
@@ -72,7 +93,7 @@ def json_format(df):
     del df["download_link"]
     result = df.to_json(orient="records")
     parsed = json.loads(result)
-    print(json.dumps(parsed, indent=4))
+    return json.dumps(parsed, indent=4)
 
 
 download_list = []
@@ -87,12 +108,11 @@ def download(pos):
     open('./{}/{} - {}.pdf'.format(path_name, path_name, download_list[pos][1]), 'wb').write(r.content)
 
 
-def pdf_download_list(df, min_year="2015", max_year="2018"):
+def pdf_download_list(df, min_year, max_year):
 
     df = df[df["year"] >= min_year]
     df = df[df["year"] <= max_year]
 
-    print("Downloading pdfs...")
     list_of_download = []
     for index, data in enumerate(df.values):
         form_number = data[0]
@@ -103,51 +123,23 @@ def pdf_download_list(df, min_year="2015", max_year="2018"):
 
 
 if __name__ == "__main__":
-    arg_list = sys.argv
+    arg_list = parse_args(sys.argv)
 
-    if arg_list[1] == GET_JSON:
-        try:
-            value = arg_list[2]
-            payload["value"] = arg_list[2]
-        except Exception as e:
-            command_error_msg(e.__str__())
-            exit()
-    elif arg_list[1] == DOWNLOAD:
-        try:
-            rex = re.compile("^[0-9]{4}-[0-9]{4}")
-            value = arg_list[2]
-            payload["value"] = arg_list[2]
-            if rex.match(arg_list[3]):
-                min_year, max_year = arg_list[3].split("-")
-                if min_year > max_year:
-                    raise Exception("The minimum year is greater than the maximum year")
-            else:
-                command_error_msg()
-                exit()
-        except Exception as e:
-            command_error_msg(e.__str__())
-            exit()
-    else:
-        command_error_msg("")
-        exit()
+    if arg_list:
 
-    while indexOfFirstRow + resultsPerPage < extract_and_return_last_item(request_data(url, payload)[0]):
-        indexOfFirstRow = indexOfFirstRow + resultsPerPage
-        payload = {
-            "indexOfFirstRow": indexOfFirstRow,
-            "sortColumn": "sortOrder",
-            "value": value,
-            "criteria": "formNumber",
-            "resultsPerPage": resultsPerPage,
-            "isDescending": "false"
-        }
-    df = pd.DataFrame(data)
+        payload = get_payload(arg_list[1], indexOfFirstRow)
 
-    if arg_list[1] == DOWNLOAD:
-        download_list = pdf_download_list(df, min_year, max_year)
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-            executor.map(download, range(len(download_list)))
-    elif arg_list[1] == GET_JSON:
-        json_format(df)
-    else:
-        command_error_msg("")
+        while indexOfFirstRow + resultsPerPage < extract_and_return_last_item(request_data(url, payload)[0])[0]:
+            indexOfFirstRow = indexOfFirstRow + resultsPerPage
+            payload = get_payload(arg_list[1], indexOfFirstRow)
+        df = pd.DataFrame(data)
+
+        if arg_list[0] == DOWNLOAD:
+            download_list = pdf_download_list(df, arg_list[2], arg_list[3])
+            print("Downloading pdfs...")
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                executor.map(download, range(len(download_list)))
+        elif arg_list[0] == GET_JSON:
+            print(json_format(df))
+        else:
+            handle_error("")
