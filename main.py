@@ -131,7 +131,9 @@ if __name__ == "__main__":
         while indexOfFirstRow + resultsPerPage < extract_and_return_last_item(request_data(url, payload)[0])[0]:
             indexOfFirstRow = indexOfFirstRow + resultsPerPage
             payload = get_payload(arg_list[1], indexOfFirstRow)
+
         df = pd.DataFrame(data)
+        df = df[df['form_number'] == arg_list[1]]
 
         if arg_list[0] == DOWNLOAD:
             download_list = pdf_download_list(df, arg_list[2], arg_list[3])
