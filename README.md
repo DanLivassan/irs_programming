@@ -33,4 +33,11 @@ Python version: Python 3.8.5
 ##### 2-
 `python main.py download "Form W-2" 2015-2020`
 
+####Testing
+
+To run the test you have to run:
+
+` python test_main.py `
+
+This will test the main functions that was defined in the main.py file
 
