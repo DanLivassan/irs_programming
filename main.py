@@ -1,11 +1,12 @@
 from bs4 import BeautifulSoup
-import requests
-import os, sys
-import pandas as pd
-import json
 from pathlib import Path
+
 import concurrent.futures
+import json
+import pandas as pd
 import re
+import requests
+import sys
 
 GET_JSON = 'get_json'
 DOWNLOAD = "download"
@@ -30,7 +31,6 @@ def get_payload(value, indexOfFirstRow):
 
 
 def parse_args(args_list):
-
     if args_list[1] == GET_JSON:
         try:
             return GET_JSON, args_list[2]
@@ -87,7 +87,7 @@ def json_format(df):
     df_max = df.groupby(["form_number"])['year'].max()
     df_min = df.groupby(["form_number"])['year'].min()
     for raw in df.values:
-        df["max"]=df_max[raw[0]]
+        df["max"] = df_max[raw[0]]
         df["min"] = df_min[raw[0]]
     del df["year"]
     del df["download_link"]
@@ -109,7 +109,6 @@ def download(pos):
 
 
 def pdf_download_list(df, min_year, max_year):
-
     df = df[df["year"] >= min_year]
     df = df[df["year"] <= max_year]
 
