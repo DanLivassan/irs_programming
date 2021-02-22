@@ -6,27 +6,31 @@ format a json response with the command get_json and download the pdfs with the 
 Python version: Python 3.8.5
 ####
 
-### To install the dependencies you have to run the command:
-`pip install requirements.txt`
+#### To clone the repository run:
+`git clone https://github.com/DanLivassan/irs_programming.git`
 
 
-### To run the script call the commands as bellow:
+#### To install the dependencies you have to run the command:
+`pip install -r requirements.txt`
+
+
+#### To run the script call the commands as bellow:
 
 `python main.py get_json "<form_number>"`
 
 
 `python main.py download "<form_number>" <min_year>-<max_year>`
 
-### Ex.:
+##### Example:
 
-### 1-
+##### 1-
 `python main.py get_json "Form W-2"`
 
 *if you want the response printed out in a file*
 
 `python main.py get_json "Form W-2" > response.json`
 
-### 2-
+##### 2-
 `python main.py download "Form W-2" 2015-2020`
 
 
