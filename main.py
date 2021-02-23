@@ -17,7 +17,6 @@ indexOfFirstRow = 0
 resultsPerPage = 200
 
 path_pattern = "{}/{} - {}.pdf"
-data = []
 url = 'https://apps.irs.gov/app/picklist/list/priorFormPublication.html'
 
 
@@ -68,6 +67,7 @@ def request_data(url, payload):
 
 
 def extract_and_return_last_item(content):
+    data = []
     soup = BeautifulSoup(content, 'html.parser')
     last_item = int(soup.find(attrs={"class": "ShowByColumn"}).text.strip().replace(",", "").split(" ")[-2])
     for line in soup.find(attrs={"class": "picklist-dataTable"}).find_all('tr')[1:]:
@@ -84,30 +84,23 @@ def extract_and_return_last_item(content):
 
 
 def json_format(df):
-    df["max"] = 0
-    df["min"] = 0
-    df_max = df.groupby(["form_number"])['year'].max()
-    df_min = df.groupby(["form_number"])['year'].min()
-    for raw in df.values:
-        df["max"] = df_max[raw[0]]
-        df["min"] = df_min[raw[0]]
+    df['max'] = df.groupby('form_number')['year'].transform('max')
+    df['min'] = df.groupby('form_number')['year'].transform('min')
     del df["year"]
     del df["download_link"]
+    df = df.drop_duplicates()
     result = df.to_json(orient="records")
     parsed = json.loads(result)
     return json.dumps(parsed, indent=4)
 
 
-download_list = []
-
-
-def download(pos):
-    path_name = download_list[pos][0]
+def download(download_item):
+    path_name = download_item[0]
     file_path = "{}".format(path_name)
-    print("{}/{} - {}.pdf - Downloading pdfs.".format(path_name, path_name, download_list[pos][1]))
+    print("{}/{} - {}.pdf - Downloading pdfs.".format(path_name, path_name, download_item[1]))
     Path(file_path).mkdir(parents=True, exist_ok=True)
-    r = requests.get(download_list[pos][2], allow_redirects=True)
-    open(BASE_DIR+'/{}/{} - {}.pdf'.format(path_name, path_name, download_list[pos][1]), 'wb').write(r.content)
+    r = requests.get(download_item[2], allow_redirects=True)
+    open(BASE_DIR + '/{}/{} - {}.pdf'.format(path_name, path_name, download_item[1]), 'wb').write(r.content)
 
 
 def pdf_download_list(df, min_year, max_year):
@@ -129,21 +122,40 @@ if __name__ == "__main__":
 
     if arg_list:
 
-        payload = get_payload(arg_list[1], indexOfFirstRow)
-
-        while indexOfFirstRow + resultsPerPage < extract_and_return_last_item(request_data(url, payload)[0])[0]:
-            indexOfFirstRow = indexOfFirstRow + resultsPerPage
-            payload = get_payload(arg_list[1], indexOfFirstRow)
-
-        df = pd.DataFrame(data)
-        df = df[df['form_number'] == arg_list[1]]
+        data = []
 
         if arg_list[0] == DOWNLOAD:
+            payload = get_payload(arg_list[1], indexOfFirstRow)
+            while True:
+                last_item, d = extract_and_return_last_item(request_data(url, payload)[0])
+                data += d
+                indexOfFirstRow = indexOfFirstRow + resultsPerPage
+                payload = get_payload(arg_list[1], indexOfFirstRow)
+                if indexOfFirstRow + resultsPerPage >= last_item:
+                    break
+            df = pd.DataFrame(data)
+            df = df[df['form_number'] == arg_list[1]]
             download_list = pdf_download_list(df, arg_list[2], arg_list[3])
             print("Downloading pdfs...")
             with concurrent.futures.ThreadPoolExecutor() as executor:
-                executor.map(download, range(len(download_list)))
+                executor.map(download, download_list)
         elif arg_list[0] == GET_JSON:
+            df = pd.DataFrame(columns=['form_number', 'form_title', 'year', 'download_link'])
+            for form_number in arg_list[1].split(","):
+                indexOfFirstRow = 0
+                form_number = form_number.strip()
+                payload = get_payload(form_number, indexOfFirstRow)
+
+                while True:
+                    last_item, d = extract_and_return_last_item(request_data(url, payload)[0])
+                    data += d
+                    indexOfFirstRow = indexOfFirstRow + resultsPerPage
+                    payload = get_payload(form_number, indexOfFirstRow)
+                    df_in = pd.DataFrame(d)
+                    if indexOfFirstRow + resultsPerPage >= last_item:
+                        df_in = df_in[df_in['form_number'] == form_number]
+                        df = df.append(df_in)
+                        break
             print(json_format(df))
         else:
             handle_error("")
