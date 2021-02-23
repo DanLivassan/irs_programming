@@ -3,6 +3,7 @@ from pathlib import Path
 
 import concurrent.futures
 import json
+import os
 import pandas as pd
 import re
 import requests
@@ -10,6 +11,7 @@ import sys
 
 GET_JSON = 'get_json'
 DOWNLOAD = "download"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 indexOfFirstRow = 0
 resultsPerPage = 200
@@ -105,7 +107,7 @@ def download(pos):
     print("{}/{} - {}.pdf - Downloading pdfs.".format(path_name, path_name, download_list[pos][1]))
     Path(file_path).mkdir(parents=True, exist_ok=True)
     r = requests.get(download_list[pos][2], allow_redirects=True)
-    open('./{}/{} - {}.pdf'.format(path_name, path_name, download_list[pos][1]), 'wb').write(r.content)
+    open(BASE_DIR+'/{}/{} - {}.pdf'.format(path_name, path_name, download_list[pos][1]), 'wb').write(r.content)
 
 
 def pdf_download_list(df, min_year, max_year):
@@ -122,6 +124,7 @@ def pdf_download_list(df, min_year, max_year):
 
 
 if __name__ == "__main__":
+    os.chdir(BASE_DIR)
     arg_list = parse_args(sys.argv)
 
     if arg_list:
