@@ -13,7 +13,6 @@ GET_JSON = 'get_json'
 DOWNLOAD = "download"
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-indexOfFirstRow = 0
 resultsPerPage = 200
 
 path_pattern = "{}/{} - {}.pdf"
@@ -84,8 +83,8 @@ def extract_and_return_last_item(content):
 
 
 def json_format(df):
-    df['max'] = df.groupby('form_number')['year'].transform('max')
-    df['min'] = df.groupby('form_number')['year'].transform('min')
+    df['min_year'] = df.groupby('form_number')['year'].transform('min')
+    df['max_year'] = df.groupby('form_number')['year'].transform('max')
     del df["year"]
     del df["download_link"]
     df = df.drop_duplicates()
@@ -116,46 +115,55 @@ def pdf_download_list(df, min_year, max_year):
     return list_of_download
 
 
+def action_download(args):
+    data = []
+    indexOfFirstRow = 0
+    payload = get_payload(args[1], indexOfFirstRow)
+
+    while True:
+        last_item, d = extract_and_return_last_item(request_data(url, payload)[0])
+        data += d
+        indexOfFirstRow = indexOfFirstRow + resultsPerPage
+        payload = get_payload(args[1], indexOfFirstRow)
+        if indexOfFirstRow + resultsPerPage >= last_item:
+            break
+    df = pd.DataFrame(data)
+    df = df[df['form_number'] == args[1]]
+    download_list = pdf_download_list(df, args[2], args[3])
+    print("Downloading pdfs...")
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        executor.map(download, download_list)
+
+
+def action_get_json(args):
+    data = []
+    df = pd.DataFrame(columns=['form_number', 'form_title', 'year', 'download_link'])
+    for form_number in args[1].split(","):
+        indexOfFirstRow = 0
+        form_number = form_number.strip()
+        payload = get_payload(form_number, indexOfFirstRow)
+
+        while True:
+            last_item, d = extract_and_return_last_item(request_data(url, payload)[0])
+            data += d
+            indexOfFirstRow = indexOfFirstRow + resultsPerPage
+            payload = get_payload(form_number, indexOfFirstRow)
+            df_in = pd.DataFrame(d)
+            if indexOfFirstRow + resultsPerPage >= last_item:
+                df_in = df_in[df_in['form_number'] == form_number]
+                df = df.append(df_in)
+                break
+    print(json_format(df))
+
+
 if __name__ == "__main__":
     os.chdir(BASE_DIR)
     arg_list = parse_args(sys.argv)
 
     if arg_list:
-
-        data = []
-
         if arg_list[0] == DOWNLOAD:
-            payload = get_payload(arg_list[1], indexOfFirstRow)
-            while True:
-                last_item, d = extract_and_return_last_item(request_data(url, payload)[0])
-                data += d
-                indexOfFirstRow = indexOfFirstRow + resultsPerPage
-                payload = get_payload(arg_list[1], indexOfFirstRow)
-                if indexOfFirstRow + resultsPerPage >= last_item:
-                    break
-            df = pd.DataFrame(data)
-            df = df[df['form_number'] == arg_list[1]]
-            download_list = pdf_download_list(df, arg_list[2], arg_list[3])
-            print("Downloading pdfs...")
-            with concurrent.futures.ThreadPoolExecutor() as executor:
-                executor.map(download, download_list)
+            action_download(arg_list)
         elif arg_list[0] == GET_JSON:
-            df = pd.DataFrame(columns=['form_number', 'form_title', 'year', 'download_link'])
-            for form_number in arg_list[1].split(","):
-                indexOfFirstRow = 0
-                form_number = form_number.strip()
-                payload = get_payload(form_number, indexOfFirstRow)
-
-                while True:
-                    last_item, d = extract_and_return_last_item(request_data(url, payload)[0])
-                    data += d
-                    indexOfFirstRow = indexOfFirstRow + resultsPerPage
-                    payload = get_payload(form_number, indexOfFirstRow)
-                    df_in = pd.DataFrame(d)
-                    if indexOfFirstRow + resultsPerPage >= last_item:
-                        df_in = df_in[df_in['form_number'] == form_number]
-                        df = df.append(df_in)
-                        break
-            print(json_format(df))
+            action_get_json(arg_list)
         else:
             handle_error("")
