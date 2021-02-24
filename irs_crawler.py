@@ -11,6 +11,9 @@ class IrsQuery:
         self.form_number = form_number
 
     def to_dict(self):
+        """
+        This function return a formatted payload query
+        """
         return {
             "indexOfFirstRow": self.index_of_first_row,
             "sortColumn": "sortOrder",
@@ -30,12 +33,18 @@ class IrsTax:
         self.download_link = download_link
 
     def download(self):
+        """
+            This function return a Response with the pdf file that will be downloaded in download_link url
+        """
         r = requests.get(self.download_link, allow_redirects=True)
         if r.status_code != 200:
             raise Exception("Fail to download tax {}".format(self.form_number))
         return r.content
 
     def to_dict(self):
+        """
+            This function return dict of the fields
+         """
         return {
             'form_number': self.form_number,
             'form_title': self.form_title,
@@ -53,6 +62,9 @@ class IrsReducedTax:
         self.max_year = max_year
 
     def to_dict(self):
+        """
+            This function return dict of the fields
+        """
         return {
             'form_number': self.form_number,
             'form_title': self.form_title,

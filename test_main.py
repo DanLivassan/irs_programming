@@ -1,7 +1,5 @@
 import unittest
 import main
-import irs_application
-import constants
 from irs_crawler import *
 
 
