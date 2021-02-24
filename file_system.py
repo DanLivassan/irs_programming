@@ -8,6 +8,11 @@ class FileSystem:
         self.base_directory = base_directory
 
     def save_tax(self, irs_tax: IrsTax):
+        """
+        This function save the pdf file of the tax passed by parameter
+        :param irs_tax:
+        :return:
+        """
         directory = "{}/{}".format(self.base_directory, irs_tax.form_number)
         Path(directory).mkdir(parents=True, exist_ok=True)
         with open('{}/{} - {}.pdf'.format(directory, irs_tax.form_number, irs_tax.year), 'wb') as file:
