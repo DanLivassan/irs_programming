@@ -44,5 +44,5 @@ To run the test you have to run:
 
 ` python test_main.py `
 
-This will test the main functions that was defined in the main.py file
+This will test the main functions of the project
 
