@@ -24,6 +24,8 @@ def parse_args(args_list):
                     raise Exception("The pattern of the year should be yyyy-yyyy")
             except Exception as e:
                 return handle_error(e.__str__())
+        else:
+            return handle_error("This action does not exists")
     except Exception as e:
         return handle_error("This action does not exists")
 
