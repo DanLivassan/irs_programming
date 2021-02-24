@@ -17,3 +17,4 @@ class FileSystem:
         Path(directory).mkdir(parents=True, exist_ok=True)
         with open('{}/{} - {}.pdf'.format(directory, irs_tax.form_number, irs_tax.year), 'wb') as file:
             file.write(irs_tax.download())
+        print('{}/{} - {}.pdf saved!'.format(directory, irs_tax.form_number, irs_tax.year))
