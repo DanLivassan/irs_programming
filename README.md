@@ -16,27 +16,18 @@ Python version: Python 3.8.5
 
 #### To run the script call the commands as bellow:
 
-`python main.py get_json "<form_number_1>, <form_number_2> ... <form_number_n>"`
+`python main.py --action get_json --form_numbers "form_number1" "form_number2" "form_numberN"`
 
-`python main.py download "<form_number>" <min_year>-<max_year>`
+`python main.py --action download --form_number "Form W-2" --year_range <min_year>-<max_year>`
 
 ##### Example:
 
 ##### 1-
-*To search a single form number:*
 
-`python main.py get_json "Form W-2`
-
-*To search a list of form numbers:*
-
-`python main.py get_json "Form W-2, Form W-3, Form W-4"`
-
-*if you want the response printed out in a file*
-
-`python main.py get_json "Form W-2" > response.json`
+`python main.py --action get_json --form_numbers "Form W-2" "Form 1095-C" "Publ 1"`
 
 ##### 2-
-`python main.py download "Form W-2" 2015-2020`
+`python main.py --action download --form_number "Form W-2" --year_range 2010-2020`
 
 #### Testing
 
