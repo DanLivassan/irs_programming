@@ -1,8 +1,8 @@
+from file_system import FileSystem
 from irs_crawler import IrsCrawler, IrsTaxes
 import concurrent.futures
 import constants
 import json
-from file_system import FileSystem
 
 
 def action_download(form_number: str, min_year: int, max_year: int):
