@@ -1,6 +1,11 @@
+
+from irs_crawler import IrsCrawler, IrsTax, IrsTaxes
+from irs_parser import IrsParser, IrsParseValidator
+from file_system import FileSystem
+
+import constants
+import os
 import unittest
-import main
-from irs_crawler import *
 
 
 class TestCrawler(unittest.TestCase):
@@ -28,21 +33,55 @@ class TestCrawler(unittest.TestCase):
         self.assertIs(type(irs_taxes), IrsTaxes)
 
 
-class TestMain(unittest.TestCase):
+class TestParserValidator(unittest.TestCase):
+    def test_download_format_of_yearrange_is_invalid(self):
+        validator = IrsParseValidator(constants.DOWNLOAD)
 
-    def test_parse_args(self):
-        download_args = ["", "download", "Pnumber", "2010-2015"]
-        wrong_pattern_args = ["", "download", "Pnumber", "201-2015"]
-        min_greater_than_max_args = ["", "download", "Pnumber", "2015-2010"]
-        self.assertEqual(main.parse_args(download_args), (main.DOWNLOAD, download_args[2], "2010", "2015"))
-        self.assertEqual(main.parse_args(wrong_pattern_args), False)
-        self.assertEqual(main.parse_args(min_greater_than_max_args), False)
+        is_valid = validator.date_range_is_valid("200-2020")
 
-        action_no_exists = ["", "noexists"]
-        self.assertEqual(main.parse_args(action_no_exists), False)
+        self.assertEqual(is_valid, False)
 
-        search_empty = ["", "get_json"]
-        self.assertEqual(main.parse_args(search_empty), False)
+    def test_download_minyear_greater_than_max_year(self):
+        validator = IrsParseValidator(constants.DOWNLOAD)
+
+        is_valid = validator.date_range_is_valid("2021-2015")
+
+        self.assertEqual(is_valid, False)
+
+    def test_download_year_out_of_the_maximum_range(self):
+        validator = IrsParseValidator(constants.DOWNLOAD)
+
+        greater_than_max_is_valid = validator.date_range_is_valid("2020-2100")
+        less_than_min_is_valid = validator.date_range_is_valid("1800-2000")
+
+        self.assertEqual(greater_than_max_is_valid, False)
+        self.assertEqual(less_than_min_is_valid, False)
+
+
+class TestFileSystem(unittest.TestCase):
+    def test_right_format_and_filename(self):
+        form_number = "form_number"
+        directory = "/directory"
+        year = 2000
+        irs_tax = IrsTax(form_number, "", year, "#")
+        pattern = f"{directory}/{form_number} - {year}.pdf"
+        file_system = FileSystem(directory)
+
+        file_path = file_system.format_and_return_filename(irs_tax, file_system.base_directory)
+
+        self.assertEqual(file_path, pattern)
+
+    def test_savetax(self):
+        form_number = "form_number"
+        base_directory = constants.BASE_DIR+"/tests_files"
+        year = 2000
+        url = "https://www.irs.gov/pub/irs-prior/p1--2017.pdf"
+        irs_tax = IrsTax(form_number, "", year, url)
+        file_system = FileSystem(base_directory)
+
+        file_system.save_tax(irs_tax)
+        directory = "{}/{}".format(file_system.base_directory, irs_tax.form_number)
+        self.assertTrue(os.path.isfile(file_system.format_and_return_filename(irs_tax, directory)))
 
 
 if __name__ == '__main__':
