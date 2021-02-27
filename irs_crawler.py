@@ -1,5 +1,5 @@
 from bs4 import BeautifulSoup
-import pandas as pd
+from collections import defaultdict
 import requests
 
 
@@ -112,15 +112,21 @@ class IrsTaxes:
         Group the taxes by minimum and maximum of years and return a list of reducedTax
         :return: list of reducedTax
         """
+        taxes_groups = defaultdict(list)
+        for tax in self.irs_taxes:
+            taxes_groups[tax.form_number].append(tax)
+        reduced_taxes = []
+        for tax_group in taxes_groups:
+            min_year = min([tax.year for tax in taxes_groups[tax_group]])
+            max_year = max([tax.year for tax in taxes_groups[tax_group]])
+            form_title = taxes_groups[tax_group][0].form_title
+            reduced_taxes.append(IrsReducedTax(
+                form_number=tax_group,
+                form_title=form_title,
+                min_year=min_year,
+                max_year=max_year))
 
-        df = pd.DataFrame.from_records([tax.to_dict() for tax in self.irs_taxes])
-        df['min_year'] = df.groupby('form_number')['year'].transform('min')
-        df['max_year'] = df.groupby('form_number')['year'].transform('max')
-        del df["year"]
-        del df["download_link"]
-        df = df.drop_duplicates()
-
-        return [IrsReducedTax(tax[0], tax[1], tax[2], tax[3]) for tax in df.values.tolist()]
+        return reduced_taxes
 
 
 def parse_html_taxes(html: bytes, expected_form_number: str, min_year: int, max_year: int) -> [IrsTax]:

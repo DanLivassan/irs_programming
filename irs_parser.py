@@ -34,7 +34,7 @@ class IrsParser:
                 "--form_number",
                 type=str,
                 required=True,
-                help="Form number that of taxes that will be searched")
+                help="Form number of tax that will be searched")
             parser.add_argument(
                 "--year_range",
                 type=str,
@@ -58,7 +58,7 @@ class IrsParseValidator:
             max_year = int(max_year)
 
             if min_year > max_year:
-                print("The minimum year is greater than maximum")
+                print("The minimum year is greater than maximum year")
                 return False
             if min_year < 1900 or max_year > 2050:
                 print("The range year pattern must be between 1900 and 2050")
