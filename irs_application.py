@@ -7,7 +7,7 @@ import json
 
 def action_download(form_number: str, min_year: int, max_year: int):
     """
-    he download action get a form number, maximum and minimum of years as parameters.
+    The download action get a form number, maximum and minimum of years as parameters.
     Performs http request, format the path and save pdfs files
     :param form_number: the form number of the tax that will be downloaded pdfs files
     :param min_year: the minimum year of the search

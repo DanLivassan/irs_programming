@@ -68,7 +68,7 @@ class IrsReducedTax:
 
     def __init__(self, form_number: str, form_title: str, min_year: int, max_year: int):
         """
-        Represents a reduced tax with the minimum and maximum year of records found on irs site
+        Represent a reduced tax with the minimum and maximum year of records found on irs site
         :param form_number: The form number of tax
         :param form_title: The title of tax
         :param min_year: minimum year founded
@@ -158,7 +158,7 @@ def parse_html_taxes(html: bytes, expected_form_number: str, min_year: int, max_
 
 def parse_last_table_index(html: bytes) -> int:
     """
-    Returns the index of the last found item
+    Return the index of the last found item
     :param html:  html page
     :return: number of last item
     """
