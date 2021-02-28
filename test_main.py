@@ -100,5 +100,5 @@ class TestFileSystem(unittest.TestCase):
         self.assertTrue(os.path.isfile(file_system.format_and_return_filename(irs_tax, directory)))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

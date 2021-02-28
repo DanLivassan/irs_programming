@@ -57,10 +57,10 @@ class IrsTax:
             Return dict of fields
          """
         return {
-            'form_number': self.form_number,
-            'form_title': self.form_title,
-            'year': self.year,
-            'download_link': self.download_link,
+            "form_number": self.form_number,
+            "form_title": self.form_title,
+            "year": self.year,
+            "download_link": self.download_link,
         }
 
 
@@ -84,10 +84,10 @@ class IrsReducedTax:
             Return dict of fields
         """
         return {
-            'form_number': self.form_number,
-            'form_title': self.form_title,
-            'min_year': self.min_year,
-            'max_year': self.max_year,
+            "form_number": self.form_number,
+            "form_title": self.form_title,
+            "min_year": self.min_year,
+            "max_year": self.max_year,
         }
 
 
@@ -139,12 +139,12 @@ def parse_html_taxes(html: bytes, expected_form_number: str, min_year: int, max_
     :return: list of IrsTax
     """
     data = []
-    soup = BeautifulSoup(html, 'html.parser')
-    for line in soup.find(attrs={"class": "picklist-dataTable"}).find_all('tr')[1:]:
-        year = int(line.find_all('td')[2].text.strip())
-        form_number = line.find_all('td')[0].text.strip()
-        form_title = line.find_all('td')[1].text.strip()
-        download_link = line.find_all('td')[0].a['href']
+    soup = BeautifulSoup(html, "html.parser")
+    for line in soup.find(attrs={"class": "picklist-dataTable"}).find_all("tr")[1:]:
+        year = int(line.find_all("td")[2].text.strip())
+        form_number = line.find_all("td")[0].text.strip()
+        form_title = line.find_all("td")[1].text.strip()
+        download_link = line.find_all("td")[0].a["href"]
         if expected_form_number != form_number or year > max_year != -1 or year < min_year != -1:
             continue
         data.append(IrsTax(
@@ -162,7 +162,7 @@ def parse_last_table_index(html: bytes) -> int:
     :param html:  html page
     :return: number of last item
     """
-    soup = BeautifulSoup(html, 'html.parser')
+    soup = BeautifulSoup(html, "html.parser")
     last_table_index = soup.find(attrs={"class": "ShowByColumn"})
     if last_table_index is None:
         return -1

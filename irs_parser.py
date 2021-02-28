@@ -71,10 +71,10 @@ class IrsParseValidator:
     def validate(self, parsed_args: dict) -> bool:
         is_valid = True
         if self._action == constants.GET_JSON:
-            is_valid = parsed_args['action'] == constants.GET_JSON and isinstance(parsed_args['form_numbers'], list)
+            is_valid = parsed_args["action"] == constants.GET_JSON and isinstance(parsed_args["form_numbers"], list)
         if self._action == constants.DOWNLOAD:
             is_valid = \
-                parsed_args['action'] == constants.DOWNLOAD and IrsParseValidator.date_range_is_valid(parsed_args['year_range'])
+                parsed_args["action"] == constants.DOWNLOAD and IrsParseValidator.date_range_is_valid(parsed_args["year_range"])
 
         return is_valid
 
