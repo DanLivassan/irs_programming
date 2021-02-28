@@ -110,6 +110,6 @@ class IrsParseValidator:
 
 
 PARSERS = {
-    'download': IrsDownloadParser,
-    'get_json': IrsJsonParser
+    "download": IrsDownloadParser,
+    "get_json": IrsJsonParser
 }
