@@ -1,4 +1,4 @@
-from irs_parser import IrsParser, IrsParseValidator
+from irs_parser import IrsParseBuilder, IrsParseValidator, PARSERS
 import constants
 import irs_application
 import sys
@@ -6,7 +6,7 @@ import sys
 
 if __name__ == "__main__":
     try:
-        parser = IrsParser(sys.argv[2]).get_parser()
+        parser = IrsParseBuilder.build(PARSERS[sys.argv[2]])
         if parser:
             parsed_args = vars(parser.parse_args())
             irs_validator = IrsParseValidator(parsed_args["action"])

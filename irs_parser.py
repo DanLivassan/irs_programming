@@ -4,47 +4,62 @@ import re
 
 
 class IrsParser:
+    @staticmethod
+    def get_parser():
+        pass
 
-    def __init__(self, action: str):
-        self._action = action
 
-    def get_parser(self):
+class IrsJsonParser(IrsParser):
+
+    @staticmethod
+    def get_parser():
         """
         Define and return the argument parser
         :return: argument parser
         """
         parser = None
-        if self._action == constants.GET_JSON:
-            parser = argparse.ArgumentParser()
-            parser.add_argument(
-                "--action",
-                type=str,
-                required=True,
-                help="The action that will be performed Ex.: download or get_json")
-            parser.add_argument(
-                "--form_numbers",
-                type=str,
-                required=True,
-                nargs="+",
-                help="List of form numbers of taxes that will be searched")
-        elif self._action == constants.DOWNLOAD:
-            parser = argparse.ArgumentParser()
-            parser.add_argument(
-                "--action",
-                type=str,
-                required=True,
-                help="The action that will be performed Ex.: download or get_json")
-            parser.add_argument(
-                "--form_number",
-                type=str,
-                required=True,
-                help="Form number of tax that will be searched")
-            parser.add_argument(
-                "--year_range",
-                type=str,
-                required=True,
-                help="The range of years that will be searched. Ex.: 2010-2020")
+
+        parser = argparse.ArgumentParser()
+        parser.add_argument(
+            "--action",
+            type=str,
+            required=True,
+            help="The action that will be performed Ex.: download or get_json")
+        parser.add_argument(
+            "--form_numbers",
+            type=str,
+            required=True,
+            nargs="+",
+            help="List of form numbers of taxes that will be searched")
         return parser
+
+
+class IrsDownloadParser(IrsParser):
+    @staticmethod
+    def get_parser():
+        parser = argparse.ArgumentParser()
+        parser.add_argument(
+            "--action",
+            type=str,
+            required=True,
+            help="The action that will be performed Ex.: download or get_json")
+        parser.add_argument(
+            "--form_number",
+            type=str,
+            required=True,
+            help="Form number of tax that will be searched")
+        parser.add_argument(
+            "--year_range",
+            type=str,
+            required=True,
+            help="The range of years that will be searched. Ex.: 2010-2020")
+        return parser
+
+
+class IrsParseBuilder:
+    @classmethod
+    def build(cls, parser: IrsParser):
+        return parser.get_parser()
 
 
 class IrsParseValidator:
@@ -88,7 +103,13 @@ class IrsParseValidator:
             is_valid = parsed_args["action"] == constants.GET_JSON and isinstance(parsed_args["form_numbers"], list)
         if self._action == constants.DOWNLOAD:
             is_valid = \
-                parsed_args["action"] == constants.DOWNLOAD and IrsParseValidator.year_range_is_valid(parsed_args["year_range"])
+                parsed_args["action"] == constants.DOWNLOAD and IrsParseValidator.year_range_is_valid(
+                    parsed_args["year_range"])
 
         return is_valid
 
+
+PARSERS = {
+    'download': IrsDownloadParser,
+    'get_json': IrsJsonParser
+}
