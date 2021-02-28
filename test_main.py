@@ -1,10 +1,11 @@
-
 from irs_crawler import IrsCrawler, IrsTax, IrsTaxes
 from irs_parser import IrsParser, IrsParseValidator
 from file_system import FileSystem
 
 import constants
 import os
+import random
+import requests
 import unittest
 
 
@@ -12,18 +13,33 @@ class TestCrawler(unittest.TestCase):
 
     def test_irstax_when_fail_download(self):
         irs_tax = IrsTax("Form Number", "Form Title", 2000, "https://www.irs.gov/pub/pdf/does_not_exists.pdf")
-        self.assertRaises(Exception, irs_tax.download)
+        self.assertRaises(requests.exceptions.InvalidURL, irs_tax.download)
 
     def test_irstaxes_group_by_min_and_max_year_grouping_two_form_numbers(self):
-        irs_tax_list = [
-            IrsTax("Form Number 1", "Form Title", 2000, "https://www.irs.gov/pub/pdf/does_not_exists.pdf"),
-            IrsTax("Form Number 1", "Form Title", 2005, "https://www.irs.gov/pub/pdf/does_not_exists.pdf"),
-            IrsTax("Form Number 1", "Form Title", 2010, "https://www.irs.gov/pub/pdf/does_not_exists.pdf"),
-            IrsTax("Form Number 2", "Form Title", 2000, "https://www.irs.gov/pub/pdf/does_not_exists.pdf"),
-            IrsTax("Form Number 2", "Form Title", 2005, "https://www.irs.gov/pub/pdf/does_not_exists.pdf"),
-            IrsTax("Form Number 2", "Form Title", 2010, "https://www.irs.gov/pub/pdf/does_not_exists.pdf")
-        ]
+        form_number_1 = "Form Number 1"
+        form_title_1 = "Form Number 1"
+        form_number_2 = "Form Number 2"
+        form_title_2 = "Form Number 2"
+        download_link = "#"
+        min_year = 1999
+        max_year = 2021
+        irs_tax_list = []
+        for i in range(10):
+            irs_tax_list.append(
+                IrsTax(form_number_1, form_title_1, random.randint(min_year + 1, max_year - 1), download_link))
+            irs_tax_list.append(
+                IrsTax(form_number_2, form_title_2, random.randint(min_year + 1, max_year - 1), download_link))
+
+        # min and max years
+        irs_tax_list.append(IrsTax(form_number_1, form_title_1, min_year, download_link))
+        irs_tax_list.append(IrsTax(form_number_2, form_title_2, min_year, download_link))
+        irs_tax_list.append(IrsTax(form_number_1, form_title_1, max_year, download_link))
+        irs_tax_list.append(IrsTax(form_number_2, form_title_2, max_year, download_link))
+
         irs_taxes = IrsTaxes(irs_tax_list)
+        for irs_reduced_tax in irs_taxes.group_by_min_and_max_year_for_each_form_number():
+            self.assertEqual(irs_reduced_tax.min_year, min_year)
+            self.assertEqual(irs_reduced_tax.max_year, max_year)
         self.assertEqual(len(irs_taxes.group_by_min_and_max_year_for_each_form_number()), 2)
 
     def test_irscrawler_extract_taxes(self):
@@ -73,7 +89,7 @@ class TestFileSystem(unittest.TestCase):
 
     def test_savetax(self):
         form_number = "form_number"
-        base_directory = constants.BASE_DIR+"/tests_files"
+        base_directory = constants.BASE_DIR + "/tests_files"
         year = 2000
         url = "https://www.irs.gov/pub/irs-prior/p1--2017.pdf"
         irs_tax = IrsTax(form_number, "", year, url)
