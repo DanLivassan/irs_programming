@@ -53,22 +53,22 @@ class TestParserValidator(unittest.TestCase):
     def test_download_format_of_yearrange_is_invalid(self):
         validator = IrsParseValidator(constants.DOWNLOAD)
 
-        is_valid = validator.date_range_is_valid("200-2020")
+        is_valid = validator.year_range_is_valid("200-2020")
 
         self.assertEqual(is_valid, False)
 
     def test_download_minyear_greater_than_max_year(self):
         validator = IrsParseValidator(constants.DOWNLOAD)
 
-        is_valid = validator.date_range_is_valid("2021-2015")
+        is_valid = validator.year_range_is_valid("2021-2015")
 
         self.assertEqual(is_valid, False)
 
     def test_download_year_out_of_the_maximum_range(self):
         validator = IrsParseValidator(constants.DOWNLOAD)
 
-        greater_than_max_is_valid = validator.date_range_is_valid("2020-2100")
-        less_than_min_is_valid = validator.date_range_is_valid("1800-2000")
+        greater_than_max_is_valid = validator.year_range_is_valid("2020-2100")
+        less_than_min_is_valid = validator.year_range_is_valid("1800-2000")
 
         self.assertEqual(greater_than_max_is_valid, False)
         self.assertEqual(less_than_min_is_valid, False)

@@ -9,6 +9,10 @@ class IrsParser:
         self._action = action
 
     def get_parser(self):
+        """
+        Define and return the argument parser
+        :return: argument parser
+        """
         parser = None
         if self._action == constants.GET_JSON:
             parser = argparse.ArgumentParser()
@@ -49,11 +53,16 @@ class IrsParseValidator:
         self._action = action
 
     @staticmethod
-    def date_range_is_valid(date_range: str) -> bool:
+    def year_range_is_valid(year_range: str) -> bool:
+        """
+        Check if the year range format is valid
+        :param year_range: year range string with format YYYY-YYYY
+        :return: True if is valid
+        """
         rex = re.compile("^[0-9]{4}-[0-9]{4}$")
 
-        if rex.match(date_range):
-            min_year, max_year = date_range.split("-")
+        if rex.match(year_range):
+            min_year, max_year = year_range.split("-")
             min_year = int(min_year)
             max_year = int(max_year)
 
@@ -69,12 +78,17 @@ class IrsParseValidator:
             return False
 
     def validate(self, parsed_args: dict) -> bool:
+        """
+        Check if the parameters of actions are valids
+        :param parsed_args:
+        :return: is_valid
+        """
         is_valid = True
         if self._action == constants.GET_JSON:
             is_valid = parsed_args["action"] == constants.GET_JSON and isinstance(parsed_args["form_numbers"], list)
         if self._action == constants.DOWNLOAD:
             is_valid = \
-                parsed_args["action"] == constants.DOWNLOAD and IrsParseValidator.date_range_is_valid(parsed_args["year_range"])
+                parsed_args["action"] == constants.DOWNLOAD and IrsParseValidator.year_range_is_valid(parsed_args["year_range"])
 
         return is_valid
 
