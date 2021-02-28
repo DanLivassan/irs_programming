@@ -30,6 +30,8 @@ def action_get_json(form_numbers: [str]):
     taxes = IrsTaxes([])
 
     for form_number in form_numbers:
+        if not form_number:
+            continue
         form_number = form_number.strip()
         taxes.append_taxes(crawler.extract_taxes(form_number))
     print(json.dumps([tax.to_dict() for tax in taxes.group_by_min_and_max_year_for_each_form_number()], indent=4))

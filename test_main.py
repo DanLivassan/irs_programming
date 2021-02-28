@@ -43,7 +43,7 @@ class TestCrawler(unittest.TestCase):
         self.assertEqual(len(irs_taxes.group_by_min_and_max_year_for_each_form_number()), 2)
 
     def test_irscrawler_extract_taxes(self):
-        url = 'https://apps.irs.gov/app/picklist/list/priorFormPublication.html'
+        url = constants.URL
         irs_crawler = IrsCrawler(url, 200)
         irs_taxes = irs_crawler.extract_taxes("Form W-2", 2000, 2010)
         self.assertIs(type(irs_taxes), IrsTaxes)

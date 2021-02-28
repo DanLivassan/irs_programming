@@ -141,9 +141,9 @@ def parse_html_taxes(html: bytes, expected_form_number: str, min_year: int, max_
     data = []
     soup = BeautifulSoup(html, 'html.parser')
     for line in soup.find(attrs={"class": "picklist-dataTable"}).find_all('tr')[1:]:
+        year = int(line.find_all('td')[2].text.strip())
         form_number = line.find_all('td')[0].text.strip()
         form_title = line.find_all('td')[1].text.strip()
-        year = int(line.find_all('td')[2].text.strip())
         download_link = line.find_all('td')[0].a['href']
         if expected_form_number != form_number or year > max_year != -1 or year < min_year != -1:
             continue
@@ -163,7 +163,11 @@ def parse_last_table_index(html: bytes) -> int:
     :return: number of last item
     """
     soup = BeautifulSoup(html, 'html.parser')
-    return int(soup.find(attrs={"class": "ShowByColumn"}).text.strip().replace(",", "").split(" ")[-2])
+    last_table_index = soup.find(attrs={"class": "ShowByColumn"})
+    if last_table_index is None:
+        return -1
+
+    return int(last_table_index.text.strip().replace(",", "").split(" ")[-2])
 
 
 class IrsCrawler:
@@ -201,6 +205,8 @@ class IrsCrawler:
         while query.index_of_first_row + self.result_per_page <= last_item:
             html = self._request_data(query)
             last_item = parse_last_table_index(html)
+            if last_item == -1:
+                continue
             irs_taxes = parse_html_taxes(html, form_number, min_year, max_year)
             data.extend(irs_taxes)
             query.index_of_first_row += self.result_per_page
