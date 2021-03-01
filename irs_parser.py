@@ -37,6 +37,10 @@ class IrsJsonParser(IrsParser):
 class IrsDownloadParser(IrsParser):
     @staticmethod
     def get_parser():
+        """
+        Define and return the argument parser
+        :return: argument parser
+        """
         parser = argparse.ArgumentParser()
         parser.add_argument(
             "--action",

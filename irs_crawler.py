@@ -71,8 +71,8 @@ class IrsReducedTax:
         Represent a reduced tax with the minimum and maximum year of records found on irs site
         :param form_number: The form number of tax
         :param form_title: The title of tax
-        :param min_year: minimum year founded
-        :param max_year: maximum year founded
+        :param min_year: minimum year found
+        :param max_year: maximum year found
         """
         self.form_number = form_number
         self.form_title = form_title
