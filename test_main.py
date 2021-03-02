@@ -83,7 +83,7 @@ class TestFileSystem(unittest.TestCase):
         pattern = f"{directory}/{form_number} - {year}.pdf"
         file_system = FileSystem(directory)
 
-        file_path = file_system.format_and_return_filename(irs_tax, file_system.base_directory)
+        file_path = irs_tax.format_and_return_filename(file_system.base_directory)
 
         self.assertEqual(file_path, pattern)
 
@@ -97,7 +97,7 @@ class TestFileSystem(unittest.TestCase):
 
         file_system.save_tax(irs_tax)
         directory = "{}/{}".format(file_system.base_directory, irs_tax.form_number)
-        self.assertTrue(os.path.isfile(file_system.format_and_return_filename(irs_tax, directory)))
+        self.assertTrue(os.path.isfile(irs_tax.format_and_return_filename(directory)))
 
 
 if __name__ == "__main__":

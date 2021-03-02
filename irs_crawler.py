@@ -52,6 +52,9 @@ class IrsTax:
             raise requests.exceptions.InvalidURL(f"File not found in: {self.download_link}")
         return r.content
 
+    def format_and_return_filename(self, directory: str) -> str:
+        return "{}/{} - {}.pdf".format(directory, self.form_number, self.year)
+
     def to_dict(self):
         """
             Return dict of fields
@@ -187,8 +190,8 @@ class IrsCrawler:
         :return: html content of the page
         """
         r = requests.get(self.base_url, params=query.to_dict())
-        if r.status_code != 200:
-            raise Exception("Fail to get irs taxes")
+        if r.status_code == 200:
+            r.raise_for_status()
         return r.content
 
     def extract_taxes(self, form_number: str, min_year: int = -1, max_year: int = -1) -> IrsTaxes:
