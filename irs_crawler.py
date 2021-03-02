@@ -144,10 +144,11 @@ def parse_html_taxes(html: bytes, expected_form_number: str, min_year: int, max_
     data = []
     soup = BeautifulSoup(html, "html.parser")
     for line in soup.find(attrs={"class": "picklist-dataTable"}).find_all("tr")[1:]:
-        year = int(line.find_all("td")[2].text.strip())
-        form_number = line.find_all("td")[0].text.strip()
-        form_title = line.find_all("td")[1].text.strip()
-        download_link = line.find_all("td")[0].a["href"]
+        cols = line.find_all("td")
+        year = int(cols[2].text.strip())
+        form_number = cols[0].text.strip()
+        form_title = cols[1].text.strip()
+        download_link = cols[0].a["href"]
         if expected_form_number != form_number or year > max_year != -1 or year < min_year != -1:
             continue
         data.append(IrsTax(
@@ -214,4 +215,3 @@ class IrsCrawler:
             data.extend(irs_taxes)
             query.index_of_first_row += self.result_per_page
         return IrsTaxes(data)
-

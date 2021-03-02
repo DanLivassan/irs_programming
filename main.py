@@ -18,6 +18,6 @@ if __name__ == "__main__":
                 elif parsed_args["action"] == constants.GET_JSON:
                     irs_application.action_get_json(parsed_args["form_numbers"])
         else:
-            print("This action does not exist. Read the docs at: https://github.com/DanLivassan/irs_programming")
+            print("This action does not exist. See the valid actions and how to call them at README.md file")
     except IndexError:
-        print("The arguments are incorrect. Read the docs at: https://github.com/DanLivassan/irs_programming")
+        print("This action does not exist. See the valid actions and how to call them at README.md file")

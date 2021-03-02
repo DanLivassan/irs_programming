@@ -1,5 +1,5 @@
 from irs_crawler import IrsCrawler, IrsTax, IrsTaxes
-from irs_parser import IrsParser, IrsParseValidator
+from irs_parser import IrsParseValidator
 from file_system import FileSystem
 
 import constants
