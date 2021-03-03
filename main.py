@@ -10,7 +10,8 @@ if __name__ == "__main__":
             irs_validator = IrsParseValidator(parsed_args["action"])
             action = parsed_args["action"]
             if irs_validator.validate(parsed_args):
-                irs_application.ACTIONS[action].perform_action(**PARSERS[action].format_args_to_action(**parsed_args))
+                kwargs = PARSERS[action].format_args_to_action(**parsed_args)
+                irs_application.ACTIONS[action].perform_action(**kwargs)
         else:
             print("This action does not exist. See the valid actions and how to call them at README.md file")
     except IndexError:
