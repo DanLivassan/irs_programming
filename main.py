@@ -1,8 +1,6 @@
 from irs_parser import IrsParseBuilder, IrsParseValidator, PARSERS
-import constants
 import irs_application
 import sys
-
 
 if __name__ == "__main__":
     try:
@@ -10,13 +8,9 @@ if __name__ == "__main__":
         if parser:
             parsed_args = vars(parser.parse_args())
             irs_validator = IrsParseValidator(parsed_args["action"])
-
+            action = parsed_args["action"]
             if irs_validator.validate(parsed_args):
-                if parsed_args["action"] == constants.DOWNLOAD:
-                    min_year, max_year = parsed_args["year_range"].split("-")
-                    irs_application.action_download(parsed_args["form_number"], int(min_year), int(max_year))
-                elif parsed_args["action"] == constants.GET_JSON:
-                    irs_application.action_get_json(parsed_args["form_numbers"])
+                irs_application.ACTIONS[action].perform_action(**PARSERS[action].format_args_to_action(**parsed_args))
         else:
             print("This action does not exist. See the valid actions and how to call them at README.md file")
     except IndexError:

@@ -6,10 +6,18 @@ import re
 class IrsParser:
     @staticmethod
     def get_parser():
-        pass
+        raise NotImplemented
+
+    @staticmethod
+    def format_args_to_action(*args) -> dict:
+        raise NotImplemented
 
 
 class IrsJsonParser(IrsParser):
+
+    @staticmethod
+    def format_args_to_action(**kwargs) -> dict:
+        return {"form_numbers": kwargs["form_numbers"]}
 
     @staticmethod
     def get_parser():
@@ -35,6 +43,16 @@ class IrsJsonParser(IrsParser):
 
 
 class IrsDownloadParser(IrsParser):
+
+    @staticmethod
+    def format_args_to_action(**kwargs) -> dict:
+        min_year, max_year = kwargs["year_range"].split("-")
+        return {
+            "form_number": kwargs["form_number"],
+            "min_year": int(min_year),
+            "max_year": int(max_year)
+        }
+
     @staticmethod
     def get_parser():
         """
