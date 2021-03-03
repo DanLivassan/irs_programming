@@ -6,6 +6,9 @@ import json
 
 
 class IrsAction:
+    """
+    Interface of actions
+    """
     @staticmethod
     def perform_action(**kwargs):
         raise NotImplemented
@@ -17,9 +20,8 @@ class IrsActionDownload(IrsAction):
         """
         The download action get a form number, maximum and minimum of years as parameters.
         Performs http request, format the path and save pdfs files
-        :param form_number: the form number of the tax that will be downloaded pdfs files
-        :param min_year: the minimum year of the search
-        :param max_year: the maximum year of the search
+        :param kwargs: dict with the the form number, minimum year and maximum year
+        of the tax that will be downloaded pdfs files
         """
         crawler = IrsCrawler(base_url=constants.URL, result_per_page=200)
         file_system = FileSystem(constants.BASE_DIR)
@@ -34,7 +36,7 @@ class IrsActionGetJson(IrsAction):
     def perform_action(**kwargs):
         """
         Gets the form numbers list and return a json response
-        :param form_numbers: list of forms numbers of the taxes that will be shown in the json format
+        :param kwargs: dict of forms numbers of the taxes that will be shown in the json format
         """
         crawler = IrsCrawler(base_url=constants.URL, result_per_page=200)
         taxes = IrsTaxes([])
